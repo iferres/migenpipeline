@@ -18,13 +18,13 @@ micropipeline <- function(gffs,
   #Run main programs
   # (Capture outputs in lists)
 
-  pang <- runPangenome(prefix, gffs) # o pewit
+  pang <- runPangenome(prefix, gffs, rargs) # o pewit
 
-  progMauve <- runProgressiveMauve(gffs)
+  xmfa <- runProgressiveMauve(gffs, pargs)
 
-  pMauve2
+  fastaCore <- stripSubsetLCBs(xmfa = xmfa, gffs, msi=500L, nco=length(gffs))
 
-  gubbins <- runGubbins(progMauve)
+  gubbins <- runGubbins(fastaCore, gargs)
 
   pStats <- pangStats(pang, progMauve, gubbins)
 
