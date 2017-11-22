@@ -104,6 +104,8 @@ stripSubsetLCBs <- function(xmfa, gffs, msi=500L, nco=length(gffs)){
   vapply(1:length(tmps), function(y){
     cat(paste0('>',he[y], '\n'), file = out, append = TRUE)
     file.append(out, tmps[y])
+    cat('\n', file = out, append = TRUE)
+    TRUE
   }, FUN.VALUE = TRUE)
 
   file.remove(tmps)
