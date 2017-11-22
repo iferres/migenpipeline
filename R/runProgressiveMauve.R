@@ -37,8 +37,25 @@ extractFastaFromGff <- function(gff)
 }
 
 
-
-stripSubsetLCBs <- function(xmfa, gffs, msi=500L, nco=length(gffs)){
+#' `xmfa` is the progressiveMauve output alignment.
+#' `gffs` is a vector with the gff3 files.
+#' `pco` and `pal` should be considered together. If a LCB has more than `pal`
+#' columns (proportion) with a proportion grater than `pco` of gaps, the LCB
+#' is not considered in the final alignment. This is suposed to be more
+#' 'correct' than passing gblocks or trimAl directly to the progressiveMauve
+#' alignment because less artificial junctions are generated. The drawback is
+#' that the final alignment may be shorter.
+#' `msi` is the minimum LCB size to be considered, and `nco` is the number
+#' of conserved sequences a LCB has to have to be considered. For now, nco
+#' must be the number of organisms in the alignment, other number is not
+#' implemented yet.
+#' The output is a FASTA alignment.
+stripSubsetLCBs <- function(xmfa,
+                            gffs,
+                            msi=500L,
+                            pco=0.8,
+                            pal=0.1,
+                            nco=length(gffs)){
 
   ncom <- (length(gffs) * 2L) + 2L
   rl <- readLines(xmfa)
@@ -60,11 +77,19 @@ stripSubsetLCBs <- function(xmfa, gffs, msi=500L, nco=length(gffs)){
     ln <- length(gp)
     nch <- nchar(paste0(rr[2L:(ifelse(ln>1L, gp[2L]-1, length(rr)-1L))],
                         collapse = ''))
-    c(ln, nch)
+    cb <- do.call(rbind,strsplit(rr[gp+1L],''))
+
+    prco <- length(which(apply(cb, 2, function(z){
+      length(which(z=='-'))/ln
+      })>pco))
+
+    pral <- prco/nch
+
+    c(ln, nch, pral)
 
   }))
 
-  wh <- which(ap[,1]==nco & ap[,2]>=msi)
+  wh <- which(ap[,1]==nco & ap[,2]>=msi & ap[,3]<=pal)
 
   if (length(wh)==0L){
     stop('No LCBs pass filters.')
