@@ -54,7 +54,7 @@ stripSubsetLCBs <- function(xmfa,
                             gffs,
                             msi=500L,
                             pco=0.1,
-                            pal=0.01,
+                            pal=0,
                             nco=length(gffs)){
 
   ncom <- (length(gffs) * 2L) + 2L
