@@ -53,8 +53,8 @@ extractFastaFromGff <- function(gff)
 stripSubsetLCBs <- function(xmfa,
                             gffs,
                             msi=500L,
-                            pco=0.8,
-                            pal=0.1,
+                            pco=0.1,
+                            pal=0.01,
                             nco=length(gffs)){
 
   ncom <- (length(gffs) * 2L) + 2L
