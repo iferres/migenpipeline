@@ -26,7 +26,7 @@ micropipeline <- function(gffs,
 
   gubbins <- runGubbins(fastaCore, gargs)
 
-  pStats <- pangStats(pang, progMauve, gubbins)
+  pStats <- pangStats(pang, progMauve, gubbins[2])
 
   # recSeqs <- extractRecSeqs(gffs, gubbins)
 

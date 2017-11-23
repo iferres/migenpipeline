@@ -20,4 +20,5 @@ runGubbins <- function(fastaCore, prefix, gargs='--threads 4 -t fasttree'){
   out[8] <- paste0(prefix, '.node_labelled.final_tree.tre')
   out[9] <- paste0(prefix, '.final_tree.tre')
 
+  return(out)
 }
