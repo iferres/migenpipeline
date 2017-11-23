@@ -39,9 +39,9 @@ extractFastaFromGff <- function(gff)
 
 #' `xmfa` is the progressiveMauve output alignment.
 #' `gffs` is a vector with the gff3 files.
-#' `pco` and `pal` should be considered together. If a LCB has more than `pal`
-#' columns (proportion) with a proportion grater than `pco` of gaps, the LCB
-#' is not considered in the final alignment. This is suposed to be more
+#' `pco` and `pal` should be taken together. Only if a LCB has less than
+#' `pal` columns (proportion) with a proportion grater than `pco` of gaps, the
+#' LCB is then considered in the final alignment. This is suposed to be more
 #' 'correct' than passing gblocks or trimAl directly to the progressiveMauve
 #' alignment because less artificial junctions are generated. The drawback is
 #' that the final alignment may be shorter.
@@ -53,8 +53,8 @@ extractFastaFromGff <- function(gff)
 stripSubsetLCBs <- function(xmfa,
                             gffs,
                             msi=500L,
-                            pco=0.1,
-                            pal=0,
+                            pco=0.1, #Less is less gaps
+                            pal=0.9, #More is less gaps
                             nco=length(gffs)){
 
   ncom <- (length(gffs) * 2L) + 2L
@@ -77,19 +77,37 @@ stripSubsetLCBs <- function(xmfa,
     ln <- length(gp)
     nch <- nchar(paste0(rr[2L:(ifelse(ln>1L, gp[2L]-1, length(rr)-1L))],
                         collapse = ''))
-    cb <- do.call(rbind,strsplit(rr[gp+1L],''))
 
+    vs <- vapply(1:length(gp), function(y){
+
+      ini <- gp[y] + 1L
+      end <- ifelse(gp[y]!=rev(gp)[1], gp[y+1L] - 1L, length(rr))
+      c(ini, end)
+
+    }, FUN.VALUE = c(1L,1L))
+
+    cb <- strsplit(apply(vs, 2, function(y){
+      paste0(rr[y[1]:y[2]], collapse = '')
+    }), '')
+
+    cb <- do.call(rbind, cb)
+
+    #Number of columns with a proportion of gaps lesser than pco.
     prco <- length(which(apply(cb, 2, function(z){
+      #proportion of gaps in each column.
       length(which(z=='-'))/ln
-      })>pco))
+      })<=pco))
 
+    #Proportion of columns with less than pco gaps.
     pral <- prco/nch
 
     c(ln, nch, pral)
 
   }))
 
-  wh <- which(ap[,1]==nco & ap[,2]>=msi & ap[,3]<=pal)
+  #Save blocks which have a proportion of columns with less than pco gaps more
+  #than pal.
+  wh <- which(ap[,1]==nco & ap[,2]>=msi & ap[,3]>=pal)
 
   if (length(wh)==0L){
     stop('No LCBs pass filters.')
