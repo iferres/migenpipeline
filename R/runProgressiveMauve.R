@@ -61,6 +61,7 @@ stripSubsetLCBs <- function(xmfa,
   rl <- readLines(xmfa)
   rl <- rl[-(1L:ncom)]
 
+  #index of chunks (blocks) of sequences in xmfa
   eq <- grep('^=', rl)
   vp <- vapply(1:length(eq), function(x){
 
@@ -70,6 +71,7 @@ stripSubsetLCBs <- function(xmfa,
 
   }, FUN.VALUE = c(1L,1L))
 
+  # Stats about chunks
   ap <- t(apply(vp, 2, function(x){
 
     rr <- rl[x[1]:x[2]]
@@ -113,6 +115,7 @@ stripSubsetLCBs <- function(xmfa,
     stop('No LCBs pass filters.')
   }
 
+  #Extract selected blocks for each genome.
   ck <- t(vp[, wh])
   ff <- apply(ck, 1, function(x){
 
@@ -138,12 +141,14 @@ stripSubsetLCBs <- function(xmfa,
   })
 
   tmps <- ff[,1]
+  rm(ff)
 
+  #Create outfile
   out <- sub('xmfa','fasta',xmfa)
-
   file.create(out)
-  he <- sub('[.]gff$', '', gffs[as.integer(sub('[.]core_fasta','',tmps))])
 
+  #Concatenate blocks
+  he <- sub('[.]gff$', '', gffs[as.integer(sub('[.]core_fasta','',tmps))])
   vapply(1:length(tmps), function(y){
     cat(paste0('>',he[y], '\n'), file = out, append = TRUE)
     file.append(out, tmps[y])
