@@ -117,7 +117,7 @@ stripSubsetLCBs <- function(xmfa,
 
   #Extract selected blocks for each genome.
   ck <- t(vp[, wh])
-  ff <- sapply(1:nrow(ck), 1, function(x){
+  ff <- sapply(1:nrow(ck), function(x){
 
     rr <- rl[ck[x,1]:ck[x,2]]
     gp <- grep('^>', rr)
