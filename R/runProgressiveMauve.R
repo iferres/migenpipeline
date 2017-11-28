@@ -121,6 +121,11 @@ stripSubsetLCBs <- function(xmfa,
 
     rr <- rl[x[1]:x[2]]
     gp <- grep('^>', rr)
+
+    chu <- sub('[.]xmfa$','.lcbs',xmfa)
+    cat(rr[gp], sep = '\n', file = chu, append = TRUE)
+    cat('=',sep = '\n', file = chu, append = TRUE)
+
     idx <- vapply(strsplit(sub('> ','',rr[gp]),':'), '[', 1, FUN.VALUE = '')
 
     ini <- gp+1L
