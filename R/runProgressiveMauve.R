@@ -117,13 +117,16 @@ stripSubsetLCBs <- function(xmfa,
 
   #Extract selected blocks for each genome.
   ck <- t(vp[, wh])
-  ff <- apply(ck, 1, function(x){
+  ff <- sapply(1:nrow(ck), 1, function(x){
 
-    rr <- rl[x[1]:x[2]]
+    rr <- rl[ck[x,1]:ck[x,2]]
     gp <- grep('^>', rr)
 
     chu <- sub('[.]xmfa$','.lcbs',xmfa)
-    cat(rr[gp], sep = '\n', file = chu, append = TRUE)
+
+    nch <- ap[wh[x], 2]
+    fi <- paste(rr[gp], ': nch =',nch)
+    cat(fi, sep = '\n', file = chu, append = TRUE)
     cat('=',sep = '\n', file = chu, append = TRUE)
 
     idx <- vapply(strsplit(sub('> ','',rr[gp]),':'), '[', 1, FUN.VALUE = '')
