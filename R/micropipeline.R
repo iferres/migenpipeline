@@ -1,4 +1,4 @@
-micropipeline <- function(gffs,
+micropipeline <- function(fnas,
                           map, # Mapping file
                           rargs = '-p 1 -cd 95',
                           pargs = '',
@@ -17,6 +17,8 @@ micropipeline <- function(gffs,
 
   #Run main programs
   # (Capture outputs in lists)
+
+  gffs <- runProkka(fnas)
 
   pang <- runPangenome(prefix, gffs, rargs) # o pewit
 
