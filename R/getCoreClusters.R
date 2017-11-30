@@ -1,6 +1,10 @@
-getCoreClusters <- function(lcbs, gffs, roary_clusters, prefix){
+getCoreClusters <- function(lcbs,
+                            gffs,
+                            roary_clusters,
+                            prefix,
+                            mc.cores = 1L){
 
-  x <- lapply(gffs, readGffTable)
+  x <- parallel::mclapply(gffs, readGff, mc.cores = mc.cores)
   names(x) <- sub('[.]gff$','', sapply(strsplit(gffs,'/'), function(y){
     rev(y)[1]
     }))
@@ -10,26 +14,36 @@ getCoreClusters <- function(lcbs, gffs, roary_clusters, prefix){
   clusters <- readRoaryClusters(roary_clusters)
 
   coreGenes <- parallel::mclapply(names(x), function(i){
-    x[[i]][which(apply(x[[i]], 1, function(y){
+    x[[i]][[1]][which(apply(x[[i]][[1]], 1, function(y){
       any(vapply(lcb, function(z){
         overlap(a = c(y[[7]],y[[8]]), b = c(z[i,2], z[i,3]))
       }, FUN.VALUE = TRUE))
     })),2]
-  }, mc.cores = 5)
+  }, mc.cores = mc.cores)
   names(coreGenes) <- names(x)
 
 
   ul <- unlist(coreGenes)
-  ulinx <- sapply(clusters, function(x){
+  ulinx <- parallel::mclapply(clusters, function(x){
     any(ul%in%x)
-  })
+  }, mc.cores = mc.cores)
+  ulinx <- unlist(ulinx)
+
+  clu <- clusters[names(which(ulinx))]
+
 
 }
 
-
-readGffTable <- function(gff){
-
+readGff <- function(gff){
   rl <- readLines(gff)
+  x <- getGffTable(rl)
+  s <- getGffSeqs(x, rl)
+  list(x,s)
+}
+
+getGffTable <- function(rl){
+
+  # rl <- readLines(gff)
 
   w <-which(grepl('^\\#\\#',rl))
 
@@ -100,6 +114,31 @@ readGffTable <- function(gff){
 
 }
 
+
+getGffSeqs <- function(x, rl){
+  gp <- grep('##FASTA',rl, fixed = TRUE) + 1L
+  fna <- rl[gp:length(rl)]
+
+
+  gph <- grep('^>', fna)
+  fna <- paste0(fna[-gph], collapse = '')
+  fna <- strsplit(fna, '')[[1]]
+
+  sqs <- apply(x, 1, function(y){
+    gen <- fna[y[[7]]:y[[8]]]
+    if(y[[9]]=='-'){
+      gen <- rev(seqinr::comp(gen, forceToLower = FALSE))
+    }
+
+    se <- paste0(gen, collapse = '')
+    seqinr::as.SeqFastadna(se)
+  })
+
+  sqs <- as.list(sqs)
+  names(sqs) <- x$LocusTag
+
+  return(sqs)
+}
 
 readLCBS <- function(lcbs){
 
