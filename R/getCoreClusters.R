@@ -4,15 +4,19 @@ getCoreClusters <- function(lcbs,
                             prefix,
                             mc.cores = 1L){
 
+  #Read gffs as list with data.frame and gene sequences
   x <- parallel::mclapply(gffs, readGff, mc.cores = mc.cores)
   names(x) <- sub('[.]gff$','', sapply(strsplit(gffs,'/'), function(y){
     rev(y)[1]
     }))
 
+  #Read LCBs
   lcb <- readLCBS(lcbs)
 
+  #Read roary's clusters
   clusters <- readRoaryClusters(roary_clusters)
 
+  #Get which genes appear in the progressiveMauve core-alignment.
   coreGenes <- parallel::mclapply(names(x), function(i){
     x[[i]][[1]][which(apply(x[[i]][[1]], 1, function(y){
       any(vapply(lcb, function(z){
@@ -22,14 +26,16 @@ getCoreClusters <- function(lcbs,
   }, mc.cores = mc.cores)
   names(coreGenes) <- names(x)
 
-
+  #Get which roary's clusters appear in the progressiveMauve core-alignment.
   ul <- unlist(coreGenes)
-  ulinx <- parallel::mclapply(clusters, function(x){
-    any(ul%in%x)
+  ulinx <- parallel::mclapply(clusters, function(y){
+    any(ul%in%y)
   }, mc.cores = mc.cores)
-  ulinx <- unlist(ulinx)
+  uliny <- unlist(uliny)
 
-  clu <- clusters[names(which(ulinx))]
+  clu <- clusters[names(which(uliny))]
+
+  #Just keep clusters with at least one gene per genome.
 
 
 }
