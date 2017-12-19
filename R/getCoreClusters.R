@@ -36,6 +36,9 @@ getCoreClusters <- function(lcbs,
   clu <- clusters[names(which(uliny))]
 
   #Just keep clusters with at least one gene per genome.
+  clu <- clu[-which(sapply(clu, length)>length(gffs))]
+
+  #Just keep one sequence per genome for each cluster
 
 
 }
