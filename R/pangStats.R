@@ -70,24 +70,34 @@ pangStats <- function (
     dat <- sapply(strsplit(gff[-c(1,2)],'\t'),'[',9)
     taxa <- sapply(strsplit(dat, ';'), '[', 3)
     taxa <- strsplit(gsub('taxa=\"|\"','',taxa), ' +')
-    taxa <- sapply(taxa, function(x){
+    taxa <- lapply(taxa, function(x){
       if (x[1]=='') x[-1] else x
+    })
+    taxa <- sapply(taxa, function(x){
+      sub('[.]\\w+$','',x)
     })
     
     #Check
-    fctr <- sub('[.]\\w+$','',unique(unlist(taxa)))
+    fctr <- unique(unlist(taxa))
     if(!all(fctr%in%nams)){
       stop("Names in gubbins gff file ('taxa' field) doesn't match with panmatrix names.")
     }
     
     #Compute
     for (i in 1:length(taxa)){
-      m[taxa[[i]], taxa[[i]]] <- m[taxa[[i]], taxa[[i]]] + 1L
+      
+      if(length(taxa[[i]])>1){
+        cn <- combn(taxa[[i]],2)
+        for (j in 1:dim(cn)[2]){
+          m[ cn[1, j], cn[2, j]] <- m[ cn[2, j], cn[1, j]] <- m[ cn[1, j], cn[2, j]] + 1L
+        }
+      }
     }
     diag(m) <- 0L
     
     return(m)
   }
+  
   
   
   
