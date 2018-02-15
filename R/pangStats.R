@@ -33,7 +33,8 @@ pangStats <- function (
   ssize=10,
   snum=500,
   accs=.95,
-  dist=1
+  dist=1,
+  cd=.95
   
 ) {
   
@@ -74,7 +75,7 @@ pangStats <- function (
     })
     
     #Check
-    fctr <- unique(unlist(taxa))
+    fctr <- sub('[.]\\w+$','',unique(unlist(taxa)))
     if(!all(fctr%in%nams)){
       stop("Names in gubbins gff file ('taxa' field) doesn't match with panmatrix names.")
     }
