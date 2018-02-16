@@ -100,7 +100,6 @@ pangStats <- function (
   
   
   
-  
   # Panmatrix
   
   print('[1/5] Processing pan-matrix...')
@@ -114,8 +113,8 @@ pangStats <- function (
   panmatrix[which(panmatrix>0)] <- 1L
   rownames(panmatrix) <- rnames
   
-  gnum <- dim(panmatrix)[1]
-  pnam <- rownames(panmatrix)
+  gnum <- dim(panmatrix)[2]
+  pnam <- colnames(panmatrix)
   pcom <- combn(pnam,2)
   dimy <- dim(pcom)[2]
   
@@ -165,15 +164,15 @@ pangStats <- function (
     # Fluidity
     
     rfluidity[i] <- mean(vapply(1:ssize, function(y){
-      p1 <- panmatrix[which(pnam==yy[1,y]), ]
-      p2 <- panmatrix[which(pnam==yy[2,y]), ]
+      p1 <- panmatrix[, which(pnam==yy[1,y])]
+      p2 <- panmatrix[, which(pnam==yy[2,y])]
       (sum(p1>0L & p2==0L) + sum(p1==0L & p2>0L)) / (sum(p1) + sum(p2))
     }, FUN.VALUE = 1))
     
     # Core genome diversity
     
     snams <- unique(as.vector(yy))
-    nmat <- which(nams%in%snams)
+    nmat <- which(sub('[.]\\w+$','',nams)%in%snams)
     dna2 <- dna[nmat,]
     rcoregene[i] <- nuc.div(dna2)
     
@@ -188,7 +187,7 @@ pangStats <- function (
     
     rnumrecom[i] <- mean(vapply(1:ncol(yy), function(y){
       m[ yy[1,y] , yy[2,y] ]
-      }, FUN.VALUE = 1L))
+    }, FUN.VALUE = 1L))
     
     setTxtProgressBar(pb, i)
   }
@@ -201,5 +200,4 @@ pangStats <- function (
   
   return(result)
 }
-
 
